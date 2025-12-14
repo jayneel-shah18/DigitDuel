@@ -62,123 +62,6 @@ npm run dev
 6. **Take Turns**: Alternate guessing until someone wins!
 7. **Play Again**: Track your series score and play multiple rounds
 
-## Deployment Options
-
-### Option 1: Heroku
-
-1. Install Heroku CLI
-2. Login to Heroku:
-```bash
-heroku login
-```
-
-3. Create a new app:
-```bash
-heroku create your-app-name
-```
-
-4. Deploy:
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git push heroku main
-```
-
-5. Open your app:
-```bash
-heroku open
-```
-
-### Option 2: Render
-
-1. Create account at [render.com](https://render.com)
-2. Connect your GitHub repository
-3. Create a new "Web Service"
-4. Configure:
-   - Build Command: `npm install`
-   - Start Command: `npm start`
-5. Click "Create Web Service"
-
-### Option 3: Railway
-
-1. Create account at [railway.app](https://railway.app)
-2. Click "New Project" → "Deploy from GitHub repo"
-3. Select your repository
-4. Railway auto-detects Node.js and deploys
-5. Get your URL from the deployment
-
-### Option 4: DigitalOcean App Platform
-
-1. Create account at [digitalocean.com](https://www.digitalocean.com)
-2. Go to App Platform
-3. Connect GitHub repository
-4. Configure:
-   - Run Command: `npm start`
-   - HTTP Port: `3000`
-5. Deploy
-
-### Option 5: Self-Hosted (VPS)
-
-On your server:
-
-```bash
-# Install Node.js
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Clone your repository
-git clone <your-repo-url>
-cd ppa-email
-
-# Install dependencies
-npm install
-
-# Install PM2 for process management
-sudo npm install -g pm2
-
-# Start the server
-pm2 start server.js --name "number-wordle"
-
-# Make it start on boot
-pm2 startup
-pm2 save
-
-# Configure Nginx (optional but recommended)
-sudo apt install nginx
-# Configure reverse proxy at /etc/nginx/sites-available/default
-```
-
-Example Nginx configuration:
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-## Environment Variables
-
-For production, you can set a custom port:
-
-```bash
-PORT=8080 npm start
-```
-
-Or create a `.env` file:
-```
-PORT=8080
-```
-
 ## Personalization Features
 
 ### 🎭 Choose Your Identity
@@ -220,18 +103,6 @@ All theme colors apply to:
 └── README.md         # This file
 ```
 
-## What's New in Version 2.0
-
-### ✨ Personalization Update
-- **Player Profiles**: Set your name and choose from 8 avatars
-- **5 Theme Colors**: Customize the entire UI with your favorite color
-- **Better Identity**: See names and avatars throughout the game
-  - In game boards
-  - Turn indicators
-  - Win/loss screens
-  - Series scores
-- **Persistent Themes**: Your theme choice applies instantly to all UI elements
-
 ## Troubleshooting
 
 **Players can't connect:**
@@ -255,4 +126,4 @@ MIT
 
 ## Credits
 
-Created with ❤️ for online gaming enthusiasts
+Created with ❤️ by Jayneel Shah
