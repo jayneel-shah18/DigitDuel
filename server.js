@@ -37,7 +37,7 @@ io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
   // Create a new room
-  socket.on('create-room', ({ name, avatar, theme }) => {
+  socket.on('create-room', ({ name, avatar }) => {
     let roomCode = generateRoomCode();
     // Ensure unique room code
     while (rooms.has(roomCode)) {
@@ -45,8 +45,8 @@ io.on('connection', (socket) => {
     }
 
     const playerInfo = {
-      1: { name: name || 'Player 1', avatar: avatar || '🐨', theme: theme || 'green' },
-      2: { name: 'Player 2', avatar: '🐨', theme: 'green' }
+      1: { name: name || 'Player 1', avatar: avatar || '🐨' },
+      2: { name: 'Player 2', avatar: '🐨' }
     };
 
     const room = {
@@ -81,7 +81,7 @@ io.on('connection', (socket) => {
   });
 
   // Join an existing room
-  socket.on('join-room', ({ code, name, avatar, theme }) => {
+  socket.on('join-room', ({ code, name, avatar }) => {
     const roomCode = code.toUpperCase().trim();
     const room = rooms.get(roomCode);
 
@@ -102,7 +102,7 @@ io.on('connection', (socket) => {
 
     room.players.push(socket.id);
     room.playerNames[socket.id] = name || 'Player 2';
-    room.playerInfo[2] = { name: name || 'Player 2', avatar: avatar || '🐨', theme: theme || 'green' };
+    room.playerInfo[2] = { name: name || 'Player 2', avatar: avatar || '🐨' };
     room.playerSockets[2] = socket.id;
     socket.join(roomCode);
     socket.roomCode = roomCode;
@@ -249,21 +249,47 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Reset game state but keep series score
-    room.secrets = {};
-    room.setupPhase = 1;
-    room.currentPlayer = 1;
-    room.guesses = { 1: [], 2: [] };
-    room.attempts = { 1: 0, 2: 0 };
-    room.gameOver = false;
-    room.winner = null;
+    // Initialize playAgainVotes if it doesn't exist
+    if (!room.playAgainVotes) {
+      room.playAgainVotes = new Set();
+    }
 
-    // Notify both players to reset
-    io.to(roomCode).emit('game-reset', {
-      seriesScore: room.seriesWins
-    });
+    // Add player's vote
+    room.playAgainVotes.add(socket.playerNumber);
 
-    console.log(`Game reset in room ${roomCode}, series score: P1=${room.seriesWins[1]}, P2=${room.seriesWins[2]}`);
+    // Check if both players have voted
+    if (room.playAgainVotes.size === 2) {
+      // Reset game state but keep series score
+      room.secrets = {};
+      room.setupPhase = 1;
+      room.currentPlayer = 1;
+      room.guesses = { 1: [], 2: [] };
+      room.attempts = { 1: 0, 2: 0 };
+      room.gameOver = false;
+      room.winner = null;
+      room.playAgainVotes = new Set(); // Clear votes for next rematch
+
+      // Notify both players to reset
+      io.to(roomCode).emit('game-reset', {
+        seriesScore: room.seriesWins
+      });
+
+      console.log(`Game reset in room ${roomCode}, series score: P1=${room.seriesWins[1]}, P2=${room.seriesWins[2]}`);
+    } else {
+      // Notify player that their vote has been registered
+      socket.emit('waiting-for-rematch', {
+        message: 'Waiting for opponent to accept rematch...'
+      });
+      
+      // Notify other player that opponent wants to play again
+      const otherPlayerNum = socket.playerNumber === 1 ? 2 : 1;
+      const otherSocketId = room.playerSockets[otherPlayerNum];
+      if (otherSocketId) {
+        io.to(otherSocketId).emit('opponent-wants-rematch', {
+          message: 'Opponent wants to play again!'
+        });
+      }
+    }
   });
 
   // Exit room

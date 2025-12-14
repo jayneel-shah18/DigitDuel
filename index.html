@@ -489,100 +489,7 @@
       box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
     }
 
-    .theme-selector {
-      display: flex;
-      gap: 12px;
-      margin: 12px 0;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
 
-    .theme-option {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px solid #374151;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-
-    .theme-option:hover {
-      transform: scale(1.15);
-    }
-
-    .theme-option.selected::after {
-      content: '✓';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-
-    .theme-green { background: linear-gradient(135deg, #22c55e, #10b981); }
-    .theme-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-    .theme-purple { background: linear-gradient(135deg, #a855f7, #9333ea); }
-    .theme-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
-    .theme-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
-
-    body.theme-blue .brand-title,
-    body.theme-blue .badge-dot,
-    body.theme-blue button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
-    body.theme-blue .tile-correct,
-    body.theme-blue .room-code-display,
-    body.theme-blue .game-over-content {
-      border-color: #3b82f6 !important;
-    }
-
-    body.theme-blue .brand-title { background: linear-gradient(135deg, #3b82f6, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    body.theme-blue button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #3b82f6; }
-    body.theme-blue .tile-correct { background: #3b82f6; }
-    body.theme-blue .badge-dot { background: #3b82f6; }
-
-    body.theme-purple .brand-title,
-    body.theme-purple .badge-dot,
-    body.theme-purple button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
-    body.theme-purple .tile-correct,
-    body.theme-purple .room-code-display,
-    body.theme-purple .game-over-content {
-      border-color: #a855f7 !important;
-    }
-
-    body.theme-purple .brand-title { background: linear-gradient(135deg, #a855f7, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    body.theme-purple button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #a855f7; }
-    body.theme-purple .tile-correct { background: #a855f7; }
-    body.theme-purple .badge-dot { background: #a855f7; }
-
-    body.theme-pink .brand-title,
-    body.theme-pink .badge-dot,
-    body.theme-pink button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
-    body.theme-pink .tile-correct,
-    body.theme-pink .room-code-display,
-    body.theme-pink .game-over-content {
-      border-color: #ec4899 !important;
-    }
-
-    body.theme-pink .brand-title { background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    body.theme-pink button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #ec4899; }
-    body.theme-pink .tile-correct { background: #ec4899; }
-    body.theme-pink .badge-dot { background: #ec4899; }
-
-    body.theme-orange .brand-title,
-    body.theme-orange .badge-dot,
-    body.theme-orange button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
-    body.theme-orange .tile-correct,
-    body.theme-orange .room-code-display,
-    body.theme-orange .game-over-content {
-      border-color: #f97316 !important;
-    }
-
-    body.theme-orange .brand-title { background: linear-gradient(135deg, #f97316, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    body.theme-orange button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #f97316; }
-    body.theme-orange .tile-correct { background: #f97316; }
-    body.theme-orange .badge-dot { background: #f97316; }
 
     .player-avatar {
       display: inline-flex;
@@ -615,9 +522,9 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="brand-title">DigitDuel</h1>
+    <h1 class="brand-title">Digit Duels</h1>
     <p class="subtitle">
-      Break your opponent's secret code in real-time
+      🎯 Real-time multiplayer code-cracking challenge • Outsmart your opponent • Crack the 4-digit secret
     </p>
 
     <div style="text-align: center; margin-bottom: 16px;">
@@ -668,17 +575,6 @@
             <div class="avatar-option selected" data-avatar="🐨">🐨</div>
             <div class="avatar-option" data-avatar="🐸">🐸</div>
             <div class="avatar-option" data-avatar="🦄">🦄</div>
-          </div>
-        </div>
-
-        <div style="margin-top: 12px;">
-          <label style="text-align: center; display: block; margin-bottom: 8px;">Choose Theme</label>
-          <div class="theme-selector">
-            <div class="theme-option theme-green selected" data-theme="green"></div>
-            <div class="theme-option theme-blue" data-theme="blue"></div>
-            <div class="theme-option theme-purple" data-theme="purple"></div>
-            <div class="theme-option theme-pink" data-theme="pink"></div>
-            <div class="theme-option theme-orange" data-theme="orange"></div>
           </div>
         </div>
       </div>
@@ -850,6 +746,9 @@
             <div id="secrets-revealed" style="color: #9ca3af; margin-top: 4px;"></div>
           </div>
         </div>
+        <div id="rematch-status" style="font-size: 0.9rem; color: #f59e0b; margin-top: 16px; display: none;">
+          ⏳ Waiting for opponent to accept rematch...
+        </div>
         <div class="button-group">
           <button id="play-again-btn">
             🔄 Play Again
@@ -917,6 +816,7 @@
     const exitRoomBtn = document.getElementById("exit-room-btn");
     const toggleInstructionsBtn = document.getElementById("toggle-instructions");
     const instructionsPanel = document.getElementById("instructions-panel");
+    const rematchStatus = document.getElementById("rematch-status");
 
     // Game state
     let myPlayerNumber = null;
@@ -933,16 +833,14 @@
     // Personalization state
     let myPlayerName = "";
     let myAvatar = "🐨";
-    let myTheme = "green";
     let playerInfo = {
-      1: { name: "Player 1", avatar: "🐨", theme: "green" },
-      2: { name: "Player 2", avatar: "🐨", theme: "green" }
+      1: { name: "Player 1", avatar: "🐨" },
+      2: { name: "Player 2", avatar: "🐨" }
     };
 
     // UI Elements for personalization
     const playerNameInput = document.getElementById("player-name-input");
     const avatarOptions = document.querySelectorAll(".avatar-option");
-    const themeOptions = document.querySelectorAll(".theme-option");
 
     // Socket.IO event handlers
     socket.on('connect', () => {
@@ -975,17 +873,6 @@
         avatarOptions.forEach(opt => opt.classList.remove('selected'));
         option.classList.add('selected');
         myAvatar = option.dataset.avatar;
-      });
-    });
-
-    // Personalization - Theme selection
-    themeOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        themeOptions.forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        myTheme = option.dataset.theme;
-        // Apply theme immediately
-        document.body.className = `theme-${myTheme}`;
       });
     });
 
@@ -1028,8 +915,8 @@
     createRoomBtn.addEventListener('click', () => {
       lobbyError.textContent = '';
       myPlayerName = getPlayerName();
-      playerInfo[1] = { name: myPlayerName, avatar: myAvatar, theme: myTheme };
-      socket.emit('create-room', { name: myPlayerName, avatar: myAvatar, theme: myTheme });
+      playerInfo[1] = { name: myPlayerName, avatar: myAvatar };
+      socket.emit('create-room', { name: myPlayerName, avatar: myAvatar });
     });
 
     // Join room button
@@ -1041,8 +928,8 @@
         return;
       }
       myPlayerName = getPlayerName();
-      playerInfo[2] = { name: myPlayerName, avatar: myAvatar, theme: myTheme };
-      socket.emit('join-room', { code, name: myPlayerName, avatar: myAvatar, theme: myTheme });
+      playerInfo[2] = { name: myPlayerName, avatar: myAvatar };
+      socket.emit('join-room', { code, name: myPlayerName, avatar: myAvatar });
     });
 
     // Allow Enter key in room code input
@@ -1101,9 +988,11 @@
       lobbyError.textContent = message;
     });
 
-    socket.on('opponent-secret-set', () => {
+    socket.on('opponent-secret-set', ({ playerNumber }) => {
       if (!secretSet) {
-        statusBar.textContent = 'Your opponent has set their secret. Waiting for you to set yours...';
+        const opponentInfo = playerInfo[playerNumber];
+        const opponentName = opponentInfo?.name || 'Your opponent';
+        statusBar.textContent = `${opponentName} has set their secret. Waiting for you to set yours...`;
       }
     });
 
@@ -1112,8 +1001,10 @@
       if (waitingForOther) {
         setupSection.style.display = 'none';
         handoffSection.style.display = 'block';
-        nextPlayerName.textContent = 'Opponent';
-        handoffMessage.textContent = 'You have set your secret. Waiting for your opponent...';
+        const opponentNum = myPlayerNumber === 1 ? 2 : 1;
+        const opponentInfo = playerInfo[opponentNum];
+        nextPlayerName.innerHTML = `<span class="avatar-badge">${opponentInfo.avatar}</span> ${opponentInfo.name}`;
+        handoffMessage.textContent = `You have set your secret. Waiting for ${opponentInfo.name}...`;
       }
     });
 
@@ -1122,9 +1013,15 @@
       currentTurnPlayer = startingPlayer;
       if (info) playerInfo = info;
       
+      // Hide all other sections and show game
       setupSection.style.display = 'none';
       handoffSection.style.display = 'none';
       gameSection.style.display = 'block';
+      
+      // Re-enable inputs for game
+      currentGuessInput.disabled = false;
+      submitGuessBtn.disabled = false;
+      gameOver = false;
       
       updatePlayerDisplay();
       updateTurnDisplay();
@@ -1151,7 +1048,10 @@
       p2Attempts = attempts[2];
       updateTurnDisplay();
       currentGuessInput.value = '';
-      statusBar.textContent = `Player ${currentPlayer}'s turn (P1: ${p1Attempts} attempts, P2: ${p2Attempts} attempts)`;
+      const currentPlayerInfo = playerInfo[currentPlayer];
+      const p1Info = playerInfo[1];
+      const p2Info = playerInfo[2];
+      statusBar.textContent = `${currentPlayerInfo.name}'s turn (${p1Info.name}: ${p1Attempts} attempts, ${p2Info.name}: ${p2Attempts} attempts)`;
     });
 
     socket.on('game-over', ({ winner, attempts, secrets, seriesScore }) => {
@@ -1178,10 +1078,27 @@
     });
 
     socket.on('player-disconnected', ({ playerNumber }) => {
-      statusBar.textContent = `Player ${playerNumber} disconnected. Game ended.`;
+      const disconnectedPlayerName = playerInfo[playerNumber]?.name || `Player ${playerNumber}`;
+      statusBar.textContent = `${disconnectedPlayerName} disconnected. Game ended.`;
       gameOver = true;
       submitGuessBtn.disabled = true;
       currentGuessInput.disabled = true;
+    });
+
+    socket.on('waiting-for-rematch', ({ message }) => {
+      // Show waiting feedback
+      rematchStatus.style.display = 'block';
+      rematchStatus.textContent = '⏳ ' + message;
+      playAgainBtn.disabled = true;
+      playAgainBtn.textContent = '⏳ Waiting...';
+    });
+
+    socket.on('opponent-wants-rematch', ({ message }) => {
+      // Show notification that opponent wants rematch
+      rematchStatus.style.display = 'block';
+      rematchStatus.textContent = '🎮 ' + message;
+      rematchStatus.style.color = '#22c55e';
+      playAgainBtn.style.animation = 'pulse 1s ease-in-out infinite';
     });
 
     socket.on('game-reset', ({ seriesScore }) => {
@@ -1198,13 +1115,24 @@
       p2Board.innerHTML = '';
       seriesWins = seriesScore;
       
+      // Reset rematch UI
+      rematchStatus.style.display = 'none';
+      rematchStatus.style.color = '#f59e0b';
+      playAgainBtn.disabled = false;
+      playAgainBtn.textContent = '🔄 Play Again';
+      playAgainBtn.style.animation = '';
+      
       // Hide modal and show setup
       gameOverModal.style.display = 'none';
       gameSection.style.display = 'none';
+      handoffSection.style.display = 'none';
       setupSection.style.display = 'block';
-      setupPlayerSpan.textContent = `Player ${myPlayerNumber}'s Turn`;
+      const myInfo = playerInfo[myPlayerNumber];
+      setupPlayerSpan.innerHTML = `<span class="avatar-badge">${myInfo.avatar}</span> ${myInfo.name}'s Turn`;
       secretInput.value = '';
       secretError.textContent = '';
+      setSecretBtn.disabled = false;
+      setSecretBtn.textContent = 'Lock It In';
       statusBar.textContent = 'New round! Set your secrets.';
     });
 
@@ -1249,9 +1177,14 @@
       }
 
       mySecret = secret;
+      secretSet = true;
       socket.emit('set-secret', { secret });
       secretInput.value = "";
       secretError.textContent = "";
+      
+      // Disable button and show feedback
+      setSecretBtn.disabled = true;
+      setSecretBtn.textContent = "✓ Secret Set";
     });
 
     // Ready button handler (handoff screen) - simplified for online play
@@ -1277,8 +1210,10 @@
       const p1Badge = document.getElementById("p1-badge");
       
       const isMyTurn = currentTurnPlayer === myPlayerNumber;
+      const currentPlayerInfo = playerInfo[currentTurnPlayer];
+      const turnPlayerName = isMyTurn ? "Your" : `${currentPlayerInfo.name}'s`;
       
-      currentTurnSpan.textContent = isMyTurn ? "Your Turn" : "Opponent's Turn";
+      currentTurnSpan.innerHTML = `<span class="avatar-badge">${currentPlayerInfo.avatar}</span> ${turnPlayerName} Turn`;
       turnIndicator.style.background = isMyTurn ? "#22c55e" : "#f59e0b";
       
       // Show appropriate board based on player perspective
