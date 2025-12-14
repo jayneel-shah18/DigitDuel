@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DigitDuel - Online Multiplayer Code Breaking</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #111827;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      padding: 24px 16px 48px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 24px;
+    }
+
+    .brand-title {
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .instruction-toggle {
+      background: none;
+      border: 1px solid #374151;
+      color: #9ca3af;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      cursor: pointer;
+      border-radius: 999px;
+    }
+
+    .instruction-toggle:hover {
+      background: #1f2937;
+      border-color: #4b5563;
+      color: #e5e7eb;
+    }
+
+    .instructions-panel {
+      background: #0f172a;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    .instructions-panel strong {
+      color: #e5e7eb;
+    }
+
+    .room-code-display {
+      background: #1f2937;
+      border: 2px dashed #22c55e;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .room-code-display .label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .room-code-display .code {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #22c55e;
+      letter-spacing: 4px;
+      font-family: monospace;
+    }
+
+    .connection-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #1f2937;
+      font-size: 0.8rem;
+      margin-bottom: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .status-dot.disconnected {
+      background: #ef4444;
+      animation: none;
+    }
+
+    .status-dot.waiting {
+      background: #f59e0b;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: .5;
+      }
+    }
+
+    .lobby-section {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .lobby-card {
+      flex: 1;
+      min-width: 280px;
+      max-width: 400px;
+    }
+
+    .copy-button {
+      background: #374151;
+      color: #e5e7eb;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background: #4b5563;
+    }
+
+    .card {
+      background: #111827;
+      border-radius: 16px;
+      padding: 16px 20px 20px;
+      margin-bottom: 16px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 20px 25px -10px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    label {
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #f9fafb;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="password"]:focus,
+    input[type="text"]:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px #22c55e33;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .row > div {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: #22c55e;
+      color: #022c22;
+      transition: transform 0.07s ease, box-shadow 0.07s ease, background 0.15s;
+      box-shadow: 0 10px 15px -8px rgba(34, 197, 94, 0.5);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      background: #16a34a;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 18px -10px rgba(34, 197, 94, 0.7);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 10px -6px rgba(34, 197, 94, 0.7);
+    }
+
+    button:disabled {
+      background: #374151;
+      color: #9ca3af;
+      box-shadow: none;
+      cursor: default;
+      transform: none;
+    }
+
+    .secondary-btn {
+      background: #374151;
+      color: #e5e7eb;
+      box-shadow: none;
+    }
+
+    .secondary-btn:hover {
+      background: #4b5563;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .error {
+      font-size: 0.8rem;
+      color: #f97373;
+      margin-top: 4px;
+    }
+
+    .game-sections {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .board {
+      background: #020617;
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid #1f2937;
+      min-height: 120px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .guess-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .tile {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      border: 1px solid #1f2937;
+    }
+
+    .tile-absent {
+      background: #111827;
+      color: #6b7280;
+    }
+
+    .tile-present {
+      background: #facc15;
+      color: #1f2937;
+    }
+
+    .tile-correct {
+      background: #22c55e;
+      color: #022c22;
+    }
+
+    .guess-info {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      padding-left: 2px;
+    }
+
+    .status-bar {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .board-wrapper {
+      position: relative;
+    }
+
+    .board-wrapper.dimmed {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .board-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .your-turn-badge {
+      background: #22c55e;
+      color: #022c22;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .game-over-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+    }
+
+    .game-over-content {
+      background: #1f2937;
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      border: 2px solid #22c55e;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    }
+
+    .game-over-title {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .game-over-stats {
+      background: #111827;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 1.1rem;
+    }
+
+    .stat-label {
+      color: #9ca3af;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: #22c55e;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .avatar-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+      justify-content: center;
+    }
+
+    .avatar-option {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #374151;
+      background: #1f2937;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.2s;
+    }
+
+    .avatar-option:hover {
+      transform: scale(1.1);
+      border-color: #22c55e;
+    }
+
+    .avatar-option.selected {
+      border-color: #22c55e;
+      border-width: 3px;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 12px;
+      margin: 12px 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .theme-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #374151;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .theme-option:hover {
+      transform: scale(1.15);
+    }
+
+    .theme-option.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .theme-green { background: linear-gradient(135deg, #22c55e, #10b981); }
+    .theme-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .theme-purple { background: linear-gradient(135deg, #a855f7, #9333ea); }
+    .theme-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .theme-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+
+    body.theme-blue .brand-title,
+    body.theme-blue .badge-dot,
+    body.theme-blue button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
+    body.theme-blue .tile-correct,
+    body.theme-blue .room-code-display,
+    body.theme-blue .game-over-content {
+      border-color: #3b82f6 !important;
+    }
+
+    body.theme-blue .brand-title { background: linear-gradient(135deg, #3b82f6, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    body.theme-blue button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #3b82f6; }
+    body.theme-blue .tile-correct { background: #3b82f6; }
+    body.theme-blue .badge-dot { background: #3b82f6; }
+
+    body.theme-purple .brand-title,
+    body.theme-purple .badge-dot,
+    body.theme-purple button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
+    body.theme-purple .tile-correct,
+    body.theme-purple .room-code-display,
+    body.theme-purple .game-over-content {
+      border-color: #a855f7 !important;
+    }
+
+    body.theme-purple .brand-title { background: linear-gradient(135deg, #a855f7, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    body.theme-purple button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #a855f7; }
+    body.theme-purple .tile-correct { background: #a855f7; }
+    body.theme-purple .badge-dot { background: #a855f7; }
+
+    body.theme-pink .brand-title,
+    body.theme-pink .badge-dot,
+    body.theme-pink button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
+    body.theme-pink .tile-correct,
+    body.theme-pink .room-code-display,
+    body.theme-pink .game-over-content {
+      border-color: #ec4899 !important;
+    }
+
+    body.theme-pink .brand-title { background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    body.theme-pink button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #ec4899; }
+    body.theme-pink .tile-correct { background: #ec4899; }
+    body.theme-pink .badge-dot { background: #ec4899; }
+
+    body.theme-orange .brand-title,
+    body.theme-orange .badge-dot,
+    body.theme-orange button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle),
+    body.theme-orange .tile-correct,
+    body.theme-orange .room-code-display,
+    body.theme-orange .game-over-content {
+      border-color: #f97316 !important;
+    }
+
+    body.theme-orange .brand-title { background: linear-gradient(135deg, #f97316, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    body.theme-orange button:not(.secondary-btn):not(.copy-button):not(.instruction-toggle) { background: #f97316; }
+    body.theme-orange .tile-correct { background: #f97316; }
+    body.theme-orange .badge-dot { background: #f97316; }
+
+    .player-avatar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .avatar-badge {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 600px) {
+      .tile {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+      }
+      
+      .brand-title {
+        font-size: 2rem;
+      }
+      
+      .avatar-option {
+        width: 42px;
+        height: 42px;
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="brand-title">DigitDuel</h1>
+    <p class="subtitle">
+      Break your opponent's secret code in real-time
+    </p>
+
+    <div style="text-align: center; margin-bottom: 16px;">
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot disconnected" id="status-dot"></span>
+        <span id="status-text">Connecting to server...</span>
+      </div>
+      <button class="instruction-toggle" id="toggle-instructions" style="display:none;">📖 How to Play</button>
+      <div class="instructions-panel" id="instructions-panel" style="display:none;">
+        <strong>Rules:</strong> Set a 4-digit secret (1-9, no repeats). Take turns guessing.<br>
+        <strong>🟢 Green:</strong> Right digit, right spot | <strong>🟡 Yellow:</strong> Right digit, wrong spot | <strong>⚫ Gray:</strong> Not in code
+      </div>
+    </div>
+
+    <!-- LOBBY CARD -->
+    <div class="card" id="lobby-section">
+      <div class="card-header">
+        <div class="card-title">Create or Join a Game</div>
+      </div>
+
+      <!-- Personalization Section -->
+      <div style="background: #0f172a; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+        <div style="text-align: center; margin-bottom: 12px;">
+          <label style="font-weight: 600; color: #e5e7eb;">Personalize Your Profile</label>
+        </div>
+        
+        <div class="row">
+          <div>
+            <label for="player-name-input">Your Name</label>
+            <input
+              id="player-name-input"
+              type="text"
+              maxlength="12"
+              autocomplete="off"
+              placeholder="Enter your name"
+            />
+          </div>
+        </div>
+
+        <div style="margin-top: 12px;">
+          <label style="text-align: center; display: block; margin-bottom: 8px;">Choose Avatar</label>
+          <div class="avatar-selector">
+            <div class="avatar-option" data-avatar="🦊">🦊</div>
+            <div class="avatar-option" data-avatar="🐻">🐻</div>
+            <div class="avatar-option" data-avatar="🐼">🐼</div>
+            <div class="avatar-option" data-avatar="🦁">🦁</div>
+            <div class="avatar-option" data-avatar="🐯">🐯</div>
+            <div class="avatar-option selected" data-avatar="🐨">🐨</div>
+            <div class="avatar-option" data-avatar="🐸">🐸</div>
+            <div class="avatar-option" data-avatar="🦄">🦄</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 12px;">
+          <label style="text-align: center; display: block; margin-bottom: 8px;">Choose Theme</label>
+          <div class="theme-selector">
+            <div class="theme-option theme-green selected" data-theme="green"></div>
+            <div class="theme-option theme-blue" data-theme="blue"></div>
+            <div class="theme-option theme-purple" data-theme="purple"></div>
+            <div class="theme-option theme-pink" data-theme="pink"></div>
+            <div class="theme-option theme-orange" data-theme="orange"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lobby-section">
+        <div class="card lobby-card" style="border: 1px solid #374151; padding: 20px;">
+          <h3 style="margin-top: 0; margin-bottom: 12px;">🎮 New Game</h3>
+          <p style="font-size: 0.9rem; color: #9ca3af; margin-bottom: 16px;">
+            Start and share code
+          </p>
+          <button id="create-room-btn">
+            Create Room
+          </button>
+        </div>
+
+        <div class="card lobby-card" style="border: 1px solid #374151; padding: 20px;">
+          <h3 style="margin-top: 0; margin-bottom: 12px;">🔗 Join Game</h3>
+          <label for="room-code-input">Room Code</label>
+          <input
+            id="room-code-input"
+            type="text"
+            maxlength="6"
+            autocomplete="off"
+            placeholder="6-digit code"
+            style="text-transform: uppercase; margin-bottom: 12px;"
+          />
+          <button id="join-room-btn">
+            Join Room
+          </button>
+        </div>
+      </div>
+
+      <div class="error" id="lobby-error" style="text-align: center;"></div>
+    </div>
+
+    <!-- WAITING ROOM -->
+    <div class="card" id="waiting-section" style="display:none;">
+      <div class="card-header">
+        <div class="card-title">Waiting for Player 2</div>
+      </div>
+
+      <div class="room-code-display">
+        <div class="label">Share this code with your friend:</div>
+        <div class="code" id="display-room-code">------</div>
+        <button class="copy-button" id="copy-code-btn">
+          Copy Code
+        </button>
+      </div>
+
+      <p style="text-align: center; color: #9ca3af;">
+        Waiting for another player to join...
+      </p>
+    </div>
+
+    <!-- SETUP CARD -->
+    <div class="card" id="setup-section" style="display:none;">
+      <div class="card-header">
+        <div class="card-title">🔐 Set Your Secret Code</div>
+        <div class="badge">
+          <span class="badge-dot" id="setup-indicator"></span>
+          <span id="setup-player" class="player-avatar"><span class="avatar-badge" id="setup-avatar"></span>Player 1's Turn</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="secret-input">Enter 4-digit secret (1-9, no repeats)</label>
+          <input
+            id="secret-input"
+            type="password"
+            maxlength="4"
+            autocomplete="off"
+            inputmode="numeric"
+            placeholder="e.g. 1234"
+          />
+          <div class="error" id="secret-error"></div>
+        </div>
+      </div>
+
+      <button id="set-secret-btn">
+        Lock It In
+      </button>
+    </div>
+
+    <!-- HANDOFF SCREEN -->
+    <div class="card" id="handoff-section" style="display:none;">
+      <div style="text-align:center; padding: 40px 20px;">
+        <h2 style="font-size: 2rem; margin-bottom: 16px;">Pass Device to <span id="next-player-name">Player 2</span></h2>
+        <p style="color: #9ca3af; font-size: 1.1rem; margin-bottom: 24px;">
+          <span id="handoff-message">Player 1 has set their secret number.</span>
+        </p>
+        <button id="ready-btn" style="font-size: 1.1rem; padding: 12px 32px;">
+          I'm Ready
+        </button>
+      </div>
+    </div>
+
+    <!-- GAME CARD -->
+    <div class="card" id="game-section" style="display:none;">
+      <div class="card-header">
+        <div class="card-title">🎯 Break The Code</div>
+        <div class="badge">
+          <span class="badge-dot" id="turn-indicator"></span>
+          <span id="current-turn" class="player-avatar"><span class="avatar-badge" id="turn-avatar"></span>Your Turn</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex: 1;">
+          <label for="current-guess">Your guess</label>
+          <input
+            id="current-guess"
+            type="text"
+            maxlength="4"
+            autocomplete="off"
+            inputmode="numeric"
+            placeholder="e.g. 5678"
+          />
+        </div>
+      </div>
+
+      <button id="submit-guess-btn">
+        🔍 Submit Guess
+      </button>
+      <div class="error" id="guess-error"></div>
+
+      <div class="game-sections" style="margin-top:14px;">
+        <div class="board-wrapper" id="p1-wrapper">
+          <div class="board-label">
+            <strong><span id="p1-name-display" class="player-avatar"><span class="avatar-badge" id="p1-avatar-display"></span>Your Guesses</span></strong>
+            <span class="your-turn-badge" id="p1-badge" style="display:none;">YOUR TURN</span>
+          </div>
+          <div class="board" id="p1-board"></div>
+          <div style="font-size:0.8rem;color:#9ca3af;margin-top:4px;">Attempts: <span id="p1-attempts">0</span></div>
+        </div>
+        <div class="board-wrapper" id="p2-wrapper">
+          <div class="board-label">
+            <strong><span id="p2-name-display" class="player-avatar"><span class="avatar-badge" id="p2-avatar-display"></span>Opponent's Guesses</span></strong>
+          </div>
+          <div class="board" id="p2-board"></div>
+          <div style="font-size:0.8rem;color:#9ca3af;margin-top:4px;">Attempts: <span id="p2-attempts">0</span></div>
+        </div>
+      </div>
+
+      <div class="status-bar" id="status-bar">
+        Game started! Player 1 goes first.
+      </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div class="game-over-modal" id="game-over-modal" style="display:none;">
+      <div class="game-over-content">
+        <div class="game-over-title" id="winner-text">🏆 Victory!</div>
+        <div class="game-over-stats">
+          <div class="stat-row">
+            <span class="stat-label">Winner:</span>
+            <span class="stat-value" id="winner-name">Player 1</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Attempts:</span>
+            <span class="stat-value" id="winner-attempts">5</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Series Score:</span>
+            <span class="stat-value" id="series-score">P1: 0 | P2: 0</span>
+          </div>
+          <div style="margin-top: 12px; font-size: 0.85rem; color: #6b7280;">
+            <div>Secrets Revealed:</div>
+            <div id="secrets-revealed" style="color: #9ca3af; margin-top: 4px;"></div>
+          </div>
+        </div>
+        <div class="button-group">
+          <button id="play-again-btn">
+            🔄 Play Again
+          </button>
+          <button class="secondary-btn" id="exit-room-btn">
+            🚪 Exit Room
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Socket.IO connection
+    const socket = io();
+
+    // UI Elements
+    const lobbySection = document.getElementById("lobby-section");
+    const waitingSection = document.getElementById("waiting-section");
+    const setupSection = document.getElementById("setup-section");
+    const handoffSection = document.getElementById("handoff-section");
+    const gameSection = document.getElementById("game-section");
+
+    const connectionStatus = document.getElementById("connection-status");
+    const statusDot = document.getElementById("status-dot");
+    const statusText = document.getElementById("status-text");
+
+    const createRoomBtn = document.getElementById("create-room-btn");
+    const joinRoomBtn = document.getElementById("join-room-btn");
+    const roomCodeInput = document.getElementById("room-code-input");
+    const lobbyError = document.getElementById("lobby-error");
+    const displayRoomCode = document.getElementById("display-room-code");
+    const copyCodeBtn = document.getElementById("copy-code-btn");
+
+    const secretInput = document.getElementById("secret-input");
+    const secretError = document.getElementById("secret-error");
+    const setSecretBtn = document.getElementById("set-secret-btn");
+    const setupPlayerSpan = document.getElementById("setup-player");
+    const setupIndicator = document.getElementById("setup-indicator");
+    
+    const nextPlayerName = document.getElementById("next-player-name");
+    const handoffMessage = document.getElementById("handoff-message");
+    const readyBtn = document.getElementById("ready-btn");
+
+    const currentGuessInput = document.getElementById("current-guess");
+    const submitGuessBtn = document.getElementById("submit-guess-btn");
+    const guessError = document.getElementById("guess-error");
+    const currentTurnSpan = document.getElementById("current-turn");
+    const turnIndicator = document.getElementById("turn-indicator");
+
+    const p1Board = document.getElementById("p1-board");
+    const p2Board = document.getElementById("p2-board");
+    const statusBar = document.getElementById("status-bar");
+    const p1AttemptsSpan = document.getElementById("p1-attempts");
+    const p2AttemptsSpan = document.getElementById("p2-attempts");
+
+    const gameOverModal = document.getElementById("game-over-modal");
+    const winnerText = document.getElementById("winner-text");
+    const winnerName = document.getElementById("winner-name");
+    const winnerAttemptsSpan = document.getElementById("winner-attempts");
+    const seriesScoreSpan = document.getElementById("series-score");
+    const secretsRevealed = document.getElementById("secrets-revealed");
+    const playAgainBtn = document.getElementById("play-again-btn");
+    const exitRoomBtn = document.getElementById("exit-room-btn");
+    const toggleInstructionsBtn = document.getElementById("toggle-instructions");
+    const instructionsPanel = document.getElementById("instructions-panel");
+
+    // Game state
+    let myPlayerNumber = null;
+    let roomCode = null;
+    let mySecret = "";
+    let currentTurnPlayer = 1;
+    let p1Attempts = 0;
+    let p2Attempts = 0;
+    let gameOver = false;
+    let gameStarted = false;
+    let secretSet = false;
+    let seriesWins = { 1: 0, 2: 0 };
+    
+    // Personalization state
+    let myPlayerName = "";
+    let myAvatar = "🐨";
+    let myTheme = "green";
+    let playerInfo = {
+      1: { name: "Player 1", avatar: "🐨", theme: "green" },
+      2: { name: "Player 2", avatar: "🐨", theme: "green" }
+    };
+
+    // UI Elements for personalization
+    const playerNameInput = document.getElementById("player-name-input");
+    const avatarOptions = document.querySelectorAll(".avatar-option");
+    const themeOptions = document.querySelectorAll(".theme-option");
+
+    // Socket.IO event handlers
+    socket.on('connect', () => {
+      statusDot.classList.remove('disconnected');
+      statusDot.classList.add('waiting');
+      statusText.textContent = 'Connected - Ready to play';
+      toggleInstructionsBtn.style.display = 'inline-flex';
+    });
+
+    socket.on('disconnect', () => {
+      statusDot.classList.add('disconnected');
+      statusDot.classList.remove('waiting');
+      statusText.textContent = 'Disconnected from server';
+    });
+
+    // Toggle instructions
+    toggleInstructionsBtn.addEventListener('click', () => {
+      if (instructionsPanel.style.display === 'none') {
+        instructionsPanel.style.display = 'block';
+        toggleInstructionsBtn.textContent = '📖 Hide Rules';
+      } else {
+        instructionsPanel.style.display = 'none';
+        toggleInstructionsBtn.textContent = '📖 How to Play';
+      }
+    });
+
+    // Personalization - Avatar selection
+    avatarOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        avatarOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        myAvatar = option.dataset.avatar;
+      });
+    });
+
+    // Personalization - Theme selection
+    themeOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        themeOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        myTheme = option.dataset.theme;
+        // Apply theme immediately
+        document.body.className = `theme-${myTheme}`;
+      });
+    });
+
+    // Get player name or generate default
+    function getPlayerName() {
+      const name = playerNameInput.value.trim();
+      return name || `Player ${myPlayerNumber}`;
+    }
+
+    // Update UI with player info
+    function updatePlayerDisplay() {
+      const p1Info = playerInfo[1];
+      const p2Info = playerInfo[2];
+      
+      // Update board labels
+      if (myPlayerNumber === 1) {
+        document.getElementById('p1-name-display').innerHTML = 
+          `<span class="avatar-badge" id="p1-avatar-display">${p1Info.avatar}</span> ${p1Info.name}`;
+        document.getElementById('p2-name-display').innerHTML = 
+          `<span class="avatar-badge" id="p2-avatar-display">${p2Info.avatar}</span> ${p2Info.name}`;
+      } else {
+        document.getElementById('p1-name-display').innerHTML = 
+          `<span class="avatar-badge" id="p1-avatar-display">${p1Info.avatar}</span> ${p1Info.name}`;
+        document.getElementById('p2-name-display').innerHTML = 
+          `<span class="avatar-badge" id="p2-avatar-display">${p2Info.avatar}</span> ${p2Info.name}`;
+      }
+
+      // Update turn display
+      const currentPlayerInfo = playerInfo[currentTurnPlayer];
+      document.getElementById('turn-avatar').textContent = currentPlayerInfo.avatar;
+      
+      // Update setup display
+      const setupAvatar = document.getElementById('setup-avatar');
+      if (setupAvatar) {
+        setupAvatar.textContent = playerInfo[myPlayerNumber].avatar;
+      }
+    }
+
+    // Create room button
+    createRoomBtn.addEventListener('click', () => {
+      lobbyError.textContent = '';
+      myPlayerName = getPlayerName();
+      playerInfo[1] = { name: myPlayerName, avatar: myAvatar, theme: myTheme };
+      socket.emit('create-room', { name: myPlayerName, avatar: myAvatar, theme: myTheme });
+    });
+
+    // Join room button
+    joinRoomBtn.addEventListener('click', () => {
+      lobbyError.textContent = '';
+      const code = roomCodeInput.value.trim();
+      if (code.length !== 6) {
+        lobbyError.textContent = 'Please enter a valid 6-character room code.';
+        return;
+      }
+      myPlayerName = getPlayerName();
+      playerInfo[2] = { name: myPlayerName, avatar: myAvatar, theme: myTheme };
+      socket.emit('join-room', { code, name: myPlayerName, avatar: myAvatar, theme: myTheme });
+    });
+
+    // Allow Enter key in room code input
+    roomCodeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        joinRoomBtn.click();
+      }
+    });
+
+    // Copy room code button
+    copyCodeBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(roomCode).then(() => {
+        copyCodeBtn.textContent = 'Copied!';
+        setTimeout(() => {
+          copyCodeBtn.textContent = 'Copy Code';
+        }, 2000);
+      });
+    });
+
+    socket.on('room-created', ({ roomCode: code, playerNumber, playerInfo: info }) => {
+      roomCode = code;
+      myPlayerNumber = playerNumber;
+      if (info) playerInfo = info;
+      displayRoomCode.textContent = code;
+      
+      lobbySection.style.display = 'none';
+      waitingSection.style.display = 'block';
+      
+      statusText.textContent = `Room ${code} - Waiting for opponent`;
+    });
+
+    socket.on('room-joined', ({ roomCode: code, playerNumber, playerInfo: info }) => {
+      roomCode = code;
+      myPlayerNumber = playerNumber;
+      if (info) playerInfo = info;
+      
+      lobbySection.style.display = 'none';
+      setupSection.style.display = 'block';
+      
+      const myInfo = playerInfo[myPlayerNumber];
+      setupPlayerSpan.innerHTML = `<span class="avatar-badge">${myInfo.avatar}</span> ${myInfo.name}`;
+      statusText.textContent = `Room ${code} - ${myInfo.name}`;
+    });
+
+    socket.on('player-joined', ({ playerInfo: info }) => {
+      if (info) playerInfo = info;
+      waitingSection.style.display = 'none';
+      setupSection.style.display = 'block';
+      
+      const myInfo = playerInfo[myPlayerNumber];
+      setupPlayerSpan.innerHTML = `<span class="avatar-badge">${myInfo.avatar}</span> ${myInfo.name}`;
+      statusText.textContent = `Room ${roomCode} - Both players connected`;
+    });
+
+    socket.on('room-error', ({ message }) => {
+      lobbyError.textContent = message;
+    });
+
+    socket.on('opponent-secret-set', () => {
+      if (!secretSet) {
+        statusBar.textContent = 'Your opponent has set their secret. Waiting for you to set yours...';
+      }
+    });
+
+    socket.on('secret-set', ({ waitingForOther }) => {
+      secretSet = true;
+      if (waitingForOther) {
+        setupSection.style.display = 'none';
+        handoffSection.style.display = 'block';
+        nextPlayerName.textContent = 'Opponent';
+        handoffMessage.textContent = 'You have set your secret. Waiting for your opponent...';
+      }
+    });
+
+    socket.on('game-start', ({ currentPlayer: startingPlayer, playerInfo: info }) => {
+      gameStarted = true;
+      currentTurnPlayer = startingPlayer;
+      if (info) playerInfo = info;
+      
+      setupSection.style.display = 'none';
+      handoffSection.style.display = 'none';
+      gameSection.style.display = 'block';
+      
+      updatePlayerDisplay();
+      updateTurnDisplay();
+      
+      const starterInfo = playerInfo[startingPlayer];
+      statusBar.textContent = `Game started! ${starterInfo.name} makes the first guess.`;
+    });
+
+    socket.on('guess-submitted', ({ playerNumber, guess, result, attempts, isCorrect }) => {
+      if (playerNumber === 1) {
+        p1Attempts = attempts;
+        p1AttemptsSpan.textContent = attempts;
+        renderGuessRow(p1Board, guess, result);
+      } else {
+        p2Attempts = attempts;
+        p2AttemptsSpan.textContent = attempts;
+        renderGuessRow(p2Board, guess, result);
+      }
+    });
+
+    socket.on('turn-changed', ({ currentPlayer, attempts }) => {
+      currentTurnPlayer = currentPlayer;
+      p1Attempts = attempts[1];
+      p2Attempts = attempts[2];
+      updateTurnDisplay();
+      currentGuessInput.value = '';
+      statusBar.textContent = `Player ${currentPlayer}'s turn (P1: ${p1Attempts} attempts, P2: ${p2Attempts} attempts)`;
+    });
+
+    socket.on('game-over', ({ winner, attempts, secrets, seriesScore }) => {
+      gameOver = true;
+      submitGuessBtn.disabled = true;
+      currentGuessInput.disabled = true;
+
+      // Update series wins
+      if (seriesScore) {
+        seriesWins = seriesScore;
+      }
+
+      const winnerInfo = playerInfo[winner];
+      const p1Info = playerInfo[1];
+      const p2Info = playerInfo[2];
+
+      // Show game over modal
+      winnerText.textContent = winner === myPlayerNumber ? '🏆 You Won!' : '💔 You Lost';
+      winnerName.innerHTML = `<span class="avatar-badge">${winnerInfo.avatar}</span> ${winnerInfo.name}`;
+      winnerAttemptsSpan.textContent = attempts[winner];
+      seriesScoreSpan.textContent = `${p1Info.name}: ${seriesWins[1]} | ${p2Info.name}: ${seriesWins[2]}`;
+      secretsRevealed.textContent = `${p1Info.name}: ${secrets[1]} | ${p2Info.name}: ${secrets[2]}`;
+      gameOverModal.style.display = 'flex';
+    });
+
+    socket.on('player-disconnected', ({ playerNumber }) => {
+      statusBar.textContent = `Player ${playerNumber} disconnected. Game ended.`;
+      gameOver = true;
+      submitGuessBtn.disabled = true;
+      currentGuessInput.disabled = true;
+    });
+
+    socket.on('game-reset', ({ seriesScore }) => {
+      // Reset game state for rematch
+      gameOver = false;
+      gameStarted = false;
+      secretSet = false;
+      mySecret = "";
+      p1Attempts = 0;
+      p2Attempts = 0;
+      p1AttemptsSpan.textContent = 0;
+      p2AttemptsSpan.textContent = 0;
+      p1Board.innerHTML = '';
+      p2Board.innerHTML = '';
+      seriesWins = seriesScore;
+      
+      // Hide modal and show setup
+      gameOverModal.style.display = 'none';
+      gameSection.style.display = 'none';
+      setupSection.style.display = 'block';
+      setupPlayerSpan.textContent = `Player ${myPlayerNumber}'s Turn`;
+      secretInput.value = '';
+      secretError.textContent = '';
+      statusBar.textContent = 'New round! Set your secrets.';
+    });
+
+    // Play again button
+    playAgainBtn.addEventListener('click', () => {
+      socket.emit('play-again');
+    });
+
+    // Exit room button
+    exitRoomBtn.addEventListener('click', () => {
+      socket.emit('exit-room');
+      // Reset everything
+      gameOverModal.style.display = 'none';
+      gameSection.style.display = 'none';
+      setupSection.style.display = 'none';
+      waitingSection.style.display = 'none';
+      lobbySection.style.display = 'block';
+      seriesWins = { 1: 0, 2: 0 };
+      myPlayerNumber = null;
+      roomCode = null;
+      roomCodeInput.value = '';
+    });
+
+    function isValidSecret(numStr) {
+      if (!/^[1-9]{4}$/.test(numStr)) {
+        return false;
+      }
+      const set = new Set(numStr);
+      return set.size === 4;
+    }
+
+    // Set secret button handler
+    setSecretBtn.addEventListener("click", () => {
+      secretError.textContent = "";
+
+      const secret = secretInput.value.trim();
+
+      if (!isValidSecret(secret)) {
+        secretError.textContent =
+          "Invalid number. Use 4 unique digits from 1–9 (no repeats, no zeros).";
+        return;
+      }
+
+      mySecret = secret;
+      socket.emit('set-secret', { secret });
+      secretInput.value = "";
+      secretError.textContent = "";
+    });
+
+    // Ready button handler (handoff screen) - simplified for online play
+    readyBtn.addEventListener("click", () => {
+      handoffSection.style.display = "none";
+      // The server will handle game state transitions
+    });
+
+    // Allow Enter key in secret input
+    secretInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        setSecretBtn.click();
+      }
+    });
+
+    function isValidGuess(numStr) {
+      return isValidSecret(numStr);
+    }
+
+    function updateTurnDisplay() {
+      const p1Wrapper = document.getElementById("p1-wrapper");
+      const p2Wrapper = document.getElementById("p2-wrapper");
+      const p1Badge = document.getElementById("p1-badge");
+      
+      const isMyTurn = currentTurnPlayer === myPlayerNumber;
+      
+      currentTurnSpan.textContent = isMyTurn ? "Your Turn" : "Opponent's Turn";
+      turnIndicator.style.background = isMyTurn ? "#22c55e" : "#f59e0b";
+      
+      // Show appropriate board based on player perspective
+      if (myPlayerNumber === 1) {
+        p1Wrapper.classList.toggle("dimmed", !isMyTurn);
+        p2Wrapper.classList.toggle("dimmed", isMyTurn);
+        p1Badge.style.display = isMyTurn ? "inline-block" : "none";
+        
+        p1Wrapper.querySelector(".board-label strong").innerHTML = 
+          'Your Guesses <span style="font-size:0.8rem;color:#9ca3af;font-weight:normal;">(targeting opponent\'s secret)</span>';
+        p2Wrapper.querySelector(".board-label strong").innerHTML = 
+          'Opponent\'s Guesses <span style="font-size:0.8rem;color:#9ca3af;font-weight:normal;">(targeting your secret)</span>';
+      } else {
+        p2Wrapper.classList.toggle("dimmed", !isMyTurn);
+        p1Wrapper.classList.toggle("dimmed", isMyTurn);
+        p1Badge.style.display = "none";
+        
+        p2Wrapper.querySelector(".board-label strong").innerHTML = 
+          'Your Guesses <span style="font-size:0.8rem;color:#9ca3af;font-weight:normal;">(targeting opponent\'s secret)</span>';
+        p1Wrapper.querySelector(".board-label strong").innerHTML = 
+          'Opponent\'s Guesses <span style="font-size:0.8rem;color:#9ca3af;font-weight:normal;">(targeting your secret)</span>';
+      }
+      
+      // Enable/disable input based on turn
+      currentGuessInput.disabled = !isMyTurn || gameOver;
+      submitGuessBtn.disabled = !isMyTurn || gameOver;
+    }
+
+    function renderGuessRow(boardElem, guessStr, result) {
+      const row = document.createElement("div");
+      row.className = "guess-row";
+
+      for (let i = 0; i < 4; i++) {
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+
+        if (result.statuses[i] === "correct") {
+          tile.classList.add("tile-correct");
+        } else if (result.statuses[i] === "present") {
+          tile.classList.add("tile-present");
+        } else {
+          tile.classList.add("tile-absent");
+        }
+
+        tile.textContent = guessStr[i];
+        row.appendChild(tile);
+      }
+
+      const info = document.createElement("div");
+      info.className = "guess-info";
+      info.textContent =
+        "Digits correct: " +
+        result.correctDigits +
+        " • In correct position: " +
+        result.correctPlace;
+
+      boardElem.appendChild(row);
+      boardElem.appendChild(info);
+      boardElem.scrollTop = boardElem.scrollHeight;
+    }
+
+    submitGuessBtn.addEventListener("click", () => {
+      if (gameOver) return;
+      if (currentTurnPlayer !== myPlayerNumber) {
+        guessError.textContent = "It's not your turn!";
+        return;
+      }
+
+      guessError.textContent = "";
+
+      const guess = currentGuessInput.value.trim();
+
+      if (!isValidGuess(guess)) {
+        guessError.textContent =
+          "Invalid guess. Use 4 unique digits from 1–9 (no repeats, no zeros).";
+        return;
+      }
+
+      // Send guess to server
+      socket.emit('submit-guess', { guess });
+      currentGuessInput.value = "";
+    });
+
+    // Allow Enter key to submit
+    currentGuessInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        submitGuessBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
