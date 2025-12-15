@@ -62,7 +62,11 @@ io.on('connection', (socket) => {
       attempts: { 1: 0, 2: 0 },
       gameOver: false,
       winner: null,
-      seriesWins: { 1: 0, 2: 0 }
+      seriesWins: { 1: 0, 2: 0 },
+      fairPlay: {
+        pendingFinalTurn: false,
+        provisionalWinner: null
+      }
     };
 
     rooms.set(roomCode, room);
@@ -216,33 +220,81 @@ io.on('connection', (socket) => {
 
     // Check win condition
     if (isCorrect) {
+      // CASE 1: Player 1 wins on their turn then allow Player 2 final chance
+      if (playerNum === 1 && !room.fairPlay.pendingFinalTurn) {
+        room.fairPlay.pendingFinalTurn = true;
+        room.fairPlay.provisionalWinner = 1;
+
+        // Switch to Player 2 for final attempt
+        room.currentPlayer = 2;
+
+        io.to(roomCode).emit('player1-won-final-chance', {
+          currentPlayer: 2,
+          attempts: room.attempts,
+          player1Name: room.playerInfo[1].name,
+          player2Name: room.playerInfo[2].name
+        });
+
+        console.log(`Player 1 won in room ${roomCode}, giving Player 2 final chance`);
+        return; //Do NOT end game yet
+      }
+
+      // CASE 2: Player 2 wins OR Player 2 ties on final chance
       room.gameOver = true;
-      room.winner = playerNum;
-      room.seriesWins[playerNum]++;
-      
+
+      // If Player 2 also guessed correctly during final chance → tie
+      if (room.fairPlay.pendingFinalTurn && playerNum === 2) {
+        room.winner = 0; // 0 = tie
+        console.log(`Game tied in room ${roomCode}`);
+      } else {
+        room.winner = playerNum;
+        room.seriesWins[playerNum]++;
+        console.log(`Player ${playerNum} won in room ${roomCode}`);
+      }
+
       io.to(roomCode).emit('game-over', {
-        winner: playerNum,
+        winner: room.winner,
         attempts: room.attempts,
         secrets: room.secrets,
-        seriesScore: room.seriesWins
+        seriesScore: room.seriesWins,
+        isTie: room.winner === 0
       });
 
-      console.log(`Player ${playerNum} won in room ${roomCode}`);
+      return;
     } else {
-      // Switch turns
+      // If Player 2 failed their final fair-play attempt
+      if (room.fairPlay.pendingFinalTurn && playerNum === 2) {
+        room.gameOver = true;
+        room.winner = room.fairPlay.provisionalWinner;
+        room.seriesWins[room.winner]++;
+
+        io.to(roomCode).emit('game-over', {
+          winner: room.winner,
+          attempts: room.attempts,
+          secrets: room.secrets,
+          seriesScore: room.seriesWins
+        });
+
+        return;
+      }
+
       room.currentPlayer = room.currentPlayer === 1 ? 2 : 1;
-      
+
       io.to(roomCode).emit('turn-changed', {
         currentPlayer: room.currentPlayer,
         attempts: room.attempts
       });
     }
-  });
+      });
 
   // Play again (rematch)
   socket.on('play-again', () => {
     const roomCode = socket.roomCode;
     const room = rooms.get(roomCode);
+    room.fairPlay = {
+      pendingFinalTurn: false,
+      provisionalWinner: null
+    };
 
     if (!room) {
       socket.emit('error', { message: 'Room not found.' });

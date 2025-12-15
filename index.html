@@ -1054,7 +1054,20 @@
       statusBar.textContent = `${currentPlayerInfo.name}'s turn (${p1Info.name}: ${p1Attempts} attempts, ${p2Info.name}: ${p2Attempts} attempts)`;
     });
 
-    socket.on('game-over', ({ winner, attempts, secrets, seriesScore }) => {
+    socket.on('player1-won-final-chance', ({ currentPlayer, attempts, player1Name, player2Name }) => {
+      currentTurnPlayer = currentPlayer;
+      p1Attempts = attempts[1];
+      p2Attempts = attempts[2];
+      updateTurnDisplay();
+      currentGuessInput.value = '';
+      
+      statusBar.textContent = `🎯 ${player1Name} guessed correctly! ${player2Name} gets one final chance to tie!`;
+      statusBar.style.backgroundColor = '#fbbf24';
+      statusBar.style.color = '#000';
+      statusBar.style.fontWeight = 'bold';
+    });
+
+    socket.on('game-over', ({ winner, attempts, secrets, seriesScore, isTie }) => {
       gameOver = true;
       submitGuessBtn.disabled = true;
       currentGuessInput.disabled = true;
@@ -1069,11 +1082,23 @@
       const p2Info = playerInfo[2];
 
       // Show game over modal
-      winnerText.textContent = winner === myPlayerNumber ? '🏆 You Won!' : '💔 You Lost';
-      winnerName.innerHTML = `<span class="avatar-badge">${winnerInfo.avatar}</span> ${winnerInfo.name}`;
-      winnerAttemptsSpan.textContent = attempts[winner];
+      if (isTie) {
+        winnerText.textContent = '🤝 It\'s a Tie!';
+        winnerName.innerHTML = `Both players guessed correctly!`;
+        winnerAttemptsSpan.textContent = `${p1Info.name}: ${attempts[1]}, ${p2Info.name}: ${attempts[2]}`;
+      } else {
+        winnerText.textContent = winner === myPlayerNumber ? '🏆 You Won!' : '💔 You Lost';
+        winnerName.innerHTML = `<span class="avatar-badge">${winnerInfo.avatar}</span> ${winnerInfo.name}`;
+        winnerAttemptsSpan.textContent = attempts[winner];
+      }
       seriesScoreSpan.textContent = `${p1Info.name}: ${seriesWins[1]} | ${p2Info.name}: ${seriesWins[2]}`;
       secretsRevealed.textContent = `${p1Info.name}: ${secrets[1]} | ${p2Info.name}: ${secrets[2]}`;
+      
+      // Reset status bar styling
+      statusBar.style.backgroundColor = '';
+      statusBar.style.color = '';
+      statusBar.style.fontWeight = '';
+      
       gameOverModal.style.display = 'flex';
     });
 
