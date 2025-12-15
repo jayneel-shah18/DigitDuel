@@ -291,16 +291,17 @@ io.on('connection', (socket) => {
   socket.on('play-again', () => {
     const roomCode = socket.roomCode;
     const room = rooms.get(roomCode);
-    room.fairPlay = {
-      pendingFinalTurn: false,
-      provisionalWinner: null
-    };
 
     if (!room) {
       socket.emit('error', { message: 'Room not found.' });
       return;
     }
 
+    room.fairPlay = {
+      pendingFinalTurn: false,
+      provisionalWinner: null
+    };
+    
     // Initialize playAgainVotes if it doesn't exist
     if (!room.playAgainVotes) {
       room.playAgainVotes = new Set();

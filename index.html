@@ -822,7 +822,7 @@
     let myPlayerNumber = null;
     let roomCode = null;
     let mySecret = "";
-    let currentTurnPlayer = 1;
+    let currentTurnPlayer = null;
     let p1Attempts = 0;
     let p2Attempts = 0;
     let gameOver = false;
@@ -887,26 +887,44 @@
       const p1Info = playerInfo[1];
       const p2Info = playerInfo[2];
       
-      // Update board labels
-      if (myPlayerNumber === 1) {
-        document.getElementById('p1-name-display').innerHTML = 
-          `<span class="avatar-badge" id="p1-avatar-display">${p1Info.avatar}</span> ${p1Info.name}`;
-        document.getElementById('p2-name-display').innerHTML = 
-          `<span class="avatar-badge" id="p2-avatar-display">${p2Info.avatar}</span> ${p2Info.name}`;
-      } else {
-        document.getElementById('p1-name-display').innerHTML = 
-          `<span class="avatar-badge" id="p1-avatar-display">${p1Info.avatar}</span> ${p1Info.name}`;
-        document.getElementById('p2-name-display').innerHTML = 
-          `<span class="avatar-badge" id="p2-avatar-display">${p2Info.avatar}</span> ${p2Info.name}`;
+      // Update board labels (only if game section is visible)
+      const p1NameDisplay = document.getElementById('p1-name-display');
+      const p2NameDisplay = document.getElementById('p2-name-display');
+      
+      if (p1NameDisplay && p2NameDisplay) {
+        if (myPlayerNumber === 1) {
+          p1NameDisplay.innerHTML = 
+            `<span class="avatar-badge" id="p1-avatar-display">${p1Info.avatar}</span> ${p1Info.name}`;
+          p2NameDisplay.innerHTML = 
+            `<span class="avatar-badge" id="p2-avatar-display">${p2Info.avatar}</span> ${p2Info.name}`;
+        } else {
+          p1NameDisplay.innerHTML = 
+            `<span class="avatar-badge" id="p1-avatar-display">${p1Info.avatar}</span> ${p1Info.name}`;
+          p2NameDisplay.innerHTML = 
+            `<span class="avatar-badge" id="p2-avatar-display">${p2Info.avatar}</span> ${p2Info.name}`;
+        }
       }
 
-      // Update turn display
-      const currentPlayerInfo = playerInfo[currentTurnPlayer];
-      document.getElementById('turn-avatar').textContent = currentPlayerInfo.avatar;
-      
+      // Update turn display (only if game section is active)
+      if (currentTurnPlayer != null && playerInfo[currentTurnPlayer] && gameStarted) {
+        const currentPlayerInfo = playerInfo[currentTurnPlayer];
+        const isMyTurn = currentTurnPlayer === myPlayerNumber;
+        const turnPlayerName = isMyTurn ? "Your" : `${currentPlayerInfo.name}'s`;
+        const turnAvatar = document.getElementById('turn-avatar');
+        if (turnAvatar) {
+          turnAvatar.textContent = currentPlayerInfo.avatar;
+        }
+        if (currentTurnSpan) {
+          currentTurnSpan.innerHTML = `<span class="avatar-badge">${currentPlayerInfo.avatar}</span> ${turnPlayerName} Turn`;
+        }
+        if (turnIndicator) {
+          turnIndicator.style.background = isMyTurn ? "#22c55e" : "#f59e0b";
+        }
+      }
+
       // Update setup display
       const setupAvatar = document.getElementById('setup-avatar');
-      if (setupAvatar) {
+      if (setupAvatar && myPlayerNumber) {
         setupAvatar.textContent = playerInfo[myPlayerNumber].avatar;
       }
     }
@@ -1009,25 +1027,28 @@
     });
 
     socket.on('game-start', ({ currentPlayer: startingPlayer, playerInfo: info }) => {
-      gameStarted = true;
-      currentTurnPlayer = startingPlayer;
-      if (info) playerInfo = info;
+      console.log(`[GAME START] My player: ${myPlayerNumber}, Starting player: ${startingPlayer}`);
       
-      // Hide all other sections and show game
+      gameStarted = true;
+      gameOver = false;
+      currentTurnPlayer = startingPlayer;
+      guessError.textContent = '';
+
+      if (info) playerInfo = info;
+
       setupSection.style.display = 'none';
       handoffSection.style.display = 'none';
       gameSection.style.display = 'block';
-      
-      // Re-enable inputs for game
-      currentGuessInput.disabled = false;
-      submitGuessBtn.disabled = false;
-      gameOver = false;
-      
+
       updatePlayerDisplay();
       updateTurnDisplay();
+      applyTurnLock();
       
+      console.log(`[GAME START] After setup - Input disabled: ${currentGuessInput.disabled}, Button disabled: ${submitGuessBtn.disabled}`);
+
       const starterInfo = playerInfo[startingPlayer];
-      statusBar.textContent = `Game started! ${starterInfo.name} makes the first guess.`;
+      statusBar.textContent =
+        `Game started! ${starterInfo.name} makes the first guess.`;
     });
 
     socket.on('guess-submitted', ({ playerNumber, guess, result, attempts, isCorrect }) => {
@@ -1047,7 +1068,9 @@
       p1Attempts = attempts[1];
       p2Attempts = attempts[2];
       updateTurnDisplay();
+      applyTurnLock(); 
       currentGuessInput.value = '';
+      guessError.textContent = '';
       const currentPlayerInfo = playerInfo[currentPlayer];
       const p1Info = playerInfo[1];
       const p2Info = playerInfo[2];
@@ -1059,6 +1082,7 @@
       p1Attempts = attempts[1];
       p2Attempts = attempts[2];
       updateTurnDisplay();
+      applyTurnLock(); 
       currentGuessInput.value = '';
       
       statusBar.textContent = `🎯 ${player1Name} guessed correctly! ${player2Name} gets one final chance to tie!`;
@@ -1069,6 +1093,7 @@
 
     socket.on('game-over', ({ winner, attempts, secrets, seriesScore, isTie }) => {
       gameOver = true;
+      applyTurnLock();
       submitGuessBtn.disabled = true;
       currentGuessInput.disabled = true;
 
@@ -1139,6 +1164,10 @@
       p1Board.innerHTML = '';
       p2Board.innerHTML = '';
       seriesWins = seriesScore;
+
+      currentTurnPlayer = null;
+      currentGuessInput.disabled = true;
+      submitGuessBtn.disabled = true;
       
       // Reset rematch UI
       rematchStatus.style.display = 'none';
@@ -1229,7 +1258,19 @@
       return isValidSecret(numStr);
     }
 
+    function applyTurnLock() {
+      const isMyTurn = (gameStarted && !gameOver && currentTurnPlayer === myPlayerNumber);
+      currentGuessInput.disabled = !isMyTurn;
+      submitGuessBtn.disabled = !isMyTurn;
+      console.log(`[TURN LOCK] gameStarted: ${gameStarted}, gameOver: ${gameOver}, currentTurnPlayer: ${currentTurnPlayer}, myPlayerNumber: ${myPlayerNumber}, isMyTurn: ${isMyTurn}, inputs disabled: ${!isMyTurn}`);
+    }
+
     function updateTurnDisplay() {
+      if (!gameStarted || gameOver || currentTurnPlayer == null) {
+        currentGuessInput.disabled = true;
+        submitGuessBtn.disabled = true;
+        return;
+      }
       const p1Wrapper = document.getElementById("p1-wrapper");
       const p2Wrapper = document.getElementById("p2-wrapper");
       const p1Badge = document.getElementById("p1-badge");
@@ -1261,10 +1302,6 @@
         p1Wrapper.querySelector(".board-label strong").innerHTML = 
           'Opponent\'s Guesses <span style="font-size:0.8rem;color:#9ca3af;font-weight:normal;">(targeting your secret)</span>';
       }
-      
-      // Enable/disable input based on turn
-      currentGuessInput.disabled = !isMyTurn || gameOver;
-      submitGuessBtn.disabled = !isMyTurn || gameOver;
     }
 
     function renderGuessRow(boardElem, guessStr, result) {
