@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>DigitDuel - Online Multiplayer Code Breaking</title>
   <style>
     * {
@@ -501,21 +502,234 @@
       font-size: 1.2rem;
     }
 
-    @media (max-width: 600px) {
+    /* Mobile phones (portrait) */
+    @media (max-width: 480px) {
+      .container {
+        padding: 16px 12px 40px;
+      }
+
+      .brand-title {
+        font-size: 1.75rem;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        font-size: 0.8rem;
+        line-height: 1.4;
+        padding: 0 8px;
+      }
+
       .tile {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        gap: 4px;
+      }
+
+      .guess-row {
+        gap: 4px;
+        justify-content: center;
+      }
+
+      .card {
+        padding: 14px 16px 18px;
+        border-radius: 12px;
+      }
+
+      .lobby-card {
+        min-width: 100%;
+        padding: 16px !important;
+      }
+
+      .avatar-option {
+        width: 44px;
+        height: 44px;
+        font-size: 1.4rem;
+      }
+
+      .avatar-selector {
+        gap: 6px;
+      }
+
+      button {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 16px;
+        font-size: 1rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .button-group button {
+        width: 100%;
+      }
+
+      .room-code-display .code {
+        font-size: 1.5rem;
+        letter-spacing: 3px;
+      }
+
+      .game-over-content {
+        padding: 28px 20px;
+        border-radius: 16px;
+      }
+
+      .game-over-title {
+        font-size: 1.8rem;
+      }
+
+      .stat-row {
         font-size: 0.95rem;
       }
-      
-      .brand-title {
-        font-size: 2rem;
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
       }
-      
+
+      .badge {
+        font-size: 0.75rem;
+      }
+
+      input[type="password"],
+      input[type="text"] {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 10px 12px;
+      }
+
+      .board {
+        max-height: 200px;
+      }
+
+      .game-sections {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .row > div {
+        min-width: 100%;
+      }
+    }
+
+    /* Mobile phones (landscape) and small tablets */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .container {
+        padding: 20px 16px 44px;
+      }
+
+      .brand-title {
+        font-size: 2.25rem;
+      }
+
+      .tile {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
+
+      .guess-row {
+        gap: 5px;
+      }
+
       .avatar-option {
-        width: 42px;
-        height: 42px;
-        font-size: 1.3rem;
+        width: 46px;
+        height: 46px;
+        font-size: 1.4rem;
+      }
+
+      .game-sections {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      button {
+        padding: 9px 18px;
+        font-size: 0.97rem;
+      }
+
+      input[type="password"],
+      input[type="text"] {
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+
+      .lobby-section {
+        flex-direction: column;
+      }
+
+      .lobby-card {
+        max-width: 100%;
+      }
+    }
+
+    /* Tablets (portrait) */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .container {
+        max-width: 800px;
+        padding: 24px 20px 48px;
+      }
+
+      .brand-title {
+        font-size: 2.75rem;
+      }
+
+      .tile {
+        width: 38px;
+        height: 38px;
+        font-size: 1.02rem;
+      }
+
+      .game-sections {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      }
+
+      .avatar-option {
+        width: 50px;
+        height: 50px;
+        font-size: 1.55rem;
+      }
+    }
+
+    /* Touch device improvements */
+    @media (hover: none) and (pointer: coarse) {
+      button {
+        min-height: 44px; /* Apple's recommended touch target */
+      }
+
+      .avatar-option {
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      .instruction-toggle {
+        min-height: 40px;
+        padding: 8px 16px;
+      }
+
+      /* Remove hover effects on touch devices */
+      button:hover {
+        transform: none;
+      }
+
+      .avatar-option:hover {
+        transform: none;
+      }
+
+      /* Add active states for better touch feedback */
+      button:active {
+        transform: scale(0.97);
+      }
+
+      .avatar-option:active {
+        transform: scale(0.95);
       }
     }
   </style>
@@ -761,9 +975,11 @@
     </div>
   </div>
 
-  <footer style="text-align: center; padding: 24px; color: #6b7280; font-size: 0.9rem; margin-top: 40px;">
-    Made with ❤️ By Jayneel & Smiti
-  </footer>
+  <!-- <footer style="text-align: center; padding: 24px 16px; color: #6b7280; font-size: 0.9rem; margin-top: 40px;">
+    <div style="max-width: 300px; margin: 0 auto;">
+      Made with ❤️ By Jayneel & Smiti
+    </div>
+  </footer> -->
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
