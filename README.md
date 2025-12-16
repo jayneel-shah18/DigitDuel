@@ -14,7 +14,7 @@ A real-time multiplayer number guessing game where players create rooms and play
 
 ## Game Rules
 
-1. Each player sets a secret 4-digit number (1-9, no repeats, no zeros)
+1. Each player sets a secret 5-digit number (1-9, repeats allowed, no zeros)
 2. Players take turns guessing each other's secret number
 3. **Green tile** = Correct digit in correct position
 4. **Yellow tile** = Correct digit in wrong position  
@@ -58,7 +58,7 @@ npm run dev
 2. **Create a Room**: Click "Create Room" to generate a 6-digit code
 3. **Share the Code**: Send the code to your friend
 4. **Join the Room**: Your friend enters the code, personalizes their profile, and joins
-5. **Set Secrets**: Both players privately set their 4-digit secret numbers
+5. **Set Secrets**: Both players privately set their 5-digit secret numbers
 6. **Take Turns**: Alternate guessing until someone wins!
 7. **Play Again**: Track your series score and play multiple rounds
 

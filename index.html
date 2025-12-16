@@ -524,7 +524,7 @@
   <div class="container">
     <h1 class="brand-title">Digit Duels</h1>
     <p class="subtitle">
-      🎯 Real-time multiplayer code-cracking challenge • Outsmart your opponent • Crack the 4-digit secret
+      🎯 Real-time multiplayer code-cracking challenge • Outsmart your opponent • Crack the 5-digit secret
     </p>
 
     <div style="text-align: center; margin-bottom: 16px;">
@@ -534,7 +534,7 @@
       </div>
       <button class="instruction-toggle" id="toggle-instructions" style="display:none;">📖 How to Play</button>
       <div class="instructions-panel" id="instructions-panel" style="display:none;">
-        <strong>Rules:</strong> Set a 4-digit secret (1-9, no repeats). Take turns guessing.<br>
+        <strong>Rules:</strong> Set a 5-digit secret (1-9, repeats allowed). Take turns guessing.<br>
         <strong>🟢 Green:</strong> Right digit, right spot | <strong>🟡 Yellow:</strong> Right digit, wrong spot | <strong>⚫ Gray:</strong> Not in code
       </div>
     </div>
@@ -641,14 +641,14 @@
 
       <div class="row">
         <div>
-          <label for="secret-input">Enter 4-digit secret (1-9, no repeats)</label>
+          <label for="secret-input">Enter 5-digit secret (1-9, repeats allowed)</label>
           <input
             id="secret-input"
             type="password"
-            maxlength="4"
+            maxlength="5"
             autocomplete="off"
             inputmode="numeric"
-            placeholder="e.g. 1234"
+            placeholder="e.g. 12345"
           />
           <div class="error" id="secret-error"></div>
         </div>
@@ -688,10 +688,10 @@
           <input
             id="current-guess"
             type="text"
-            maxlength="4"
+            maxlength="5"
             autocomplete="off"
             inputmode="numeric"
-            placeholder="e.g. 5678"
+            placeholder="e.g. 56789"
           />
         </div>
       </div>
@@ -760,6 +760,10 @@
       </div>
     </div>
   </div>
+
+  <footer style="text-align: center; padding: 24px; color: #6b7280; font-size: 0.9rem; margin-top: 40px;">
+    Made with ❤️ By Jayneel & Smiti
+  </footer>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -1211,11 +1215,11 @@
     });
 
     function isValidSecret(numStr) {
-      if (!/^[1-9]{4}$/.test(numStr)) {
+      if (!/^[1-9]{5}$/.test(numStr)) {
         return false;
       }
-      const set = new Set(numStr);
-      return set.size === 4;
+      // Allow repeating digits
+      return true;
     }
 
     // Set secret button handler
@@ -1226,7 +1230,7 @@
 
       if (!isValidSecret(secret)) {
         secretError.textContent =
-          "Invalid number. Use 4 unique digits from 1–9 (no repeats, no zeros).";
+          "Must be 5 digits (1-9, repeats allowed).";
         return;
       }
 
@@ -1308,7 +1312,7 @@
       const row = document.createElement("div");
       row.className = "guess-row";
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < guessStr.length; i++) {
         const tile = document.createElement("div");
         tile.classList.add("tile");
 
@@ -1350,7 +1354,7 @@
 
       if (!isValidGuess(guess)) {
         guessError.textContent =
-          "Invalid guess. Use 4 unique digits from 1–9 (no repeats, no zeros).";
+          "Invalid guess. Use 5 digits from 1–9 (repeats allowed, no zeros).";
         return;
       }
 

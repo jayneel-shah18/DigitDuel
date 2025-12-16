@@ -205,7 +205,7 @@ io.on('connection', (socket) => {
     room.attempts[playerNum]++;
     room.guesses[playerNum].push({ guess, result });
 
-    const isCorrect = result.correctPlace === 4;
+    const isCorrect = result.correctPlace === 5;
     
     // Broadcast the guess to both players
     io.to(roomCode).emit('guess-submitted', {
@@ -403,16 +403,17 @@ io.on('connection', (socket) => {
 
 // Evaluate guess vs secret (Wordle-like)
 function evaluateGuess(secret, guess) {
-  const statuses = Array(4).fill("absent");
+  const length = secret.length;
+  const statuses = Array(length).fill("absent");
   let correctPlace = 0;
   let correctDigits = 0;
 
   const secretArr = secret.split("");
   const guessArr = guess.split("");
-  const usedSecret = [false, false, false, false];
+  const usedSecret = Array(length).fill(false);
 
   // First pass: correct place
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < length; i++) {
     if (guessArr[i] === secretArr[i]) {
       statuses[i] = "correct";
       correctPlace++;
@@ -422,11 +423,11 @@ function evaluateGuess(secret, guess) {
   }
 
   // Second pass: present (correct digit wrong position)
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < length; i++) {
     if (statuses[i] === "correct") continue;
     const digit = guessArr[i];
 
-    for (let j = 0; j < 4; j++) {
+    for (let j = 0; j < length; j++) {
       if (!usedSecret[j] && digit === secretArr[j]) {
         statuses[i] = "present";
         correctDigits++;
