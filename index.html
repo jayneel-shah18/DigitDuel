@@ -502,7 +502,6 @@
       font-size: 1.2rem;
     }
 
-    /* Mobile phones (portrait) */
     @media (max-width: 480px) {
       .container {
         padding: 16px 12px 40px;
@@ -597,7 +596,7 @@
 
       input[type="password"],
       input[type="text"] {
-        font-size: 16px; /* Prevents zoom on iOS */
+        font-size: 16px;
         padding: 10px 12px;
       }
 
@@ -620,7 +619,6 @@
       }
     }
 
-    /* Mobile phones (landscape) and small tablets */
     @media (min-width: 481px) and (max-width: 768px) {
       .container {
         padding: 20px 16px 44px;
@@ -658,7 +656,7 @@
 
       input[type="password"],
       input[type="text"] {
-        font-size: 16px; /* Prevents zoom on iOS */
+        font-size: 16px;
       }
 
       .lobby-section {
@@ -670,7 +668,6 @@
       }
     }
 
-    /* Tablets (portrait) */
     @media (min-width: 769px) and (max-width: 1024px) {
       .container {
         max-width: 800px;
@@ -698,10 +695,9 @@
       }
     }
 
-    /* Touch device improvements */
     @media (hover: none) and (pointer: coarse) {
       button {
-        min-height: 44px; /* Apple's recommended touch target */
+        min-height: 44px;
       }
 
       .avatar-option {
@@ -714,7 +710,6 @@
         padding: 8px 16px;
       }
 
-      /* Remove hover effects on touch devices */
       button:hover {
         transform: none;
       }
@@ -723,7 +718,6 @@
         transform: none;
       }
 
-      /* Add active states for better touch feedback */
       button:active {
         transform: scale(0.97);
       }
@@ -753,13 +747,11 @@
       </div>
     </div>
 
-    <!-- LOBBY CARD -->
     <div class="card" id="lobby-section">
       <div class="card-header">
         <div class="card-title">Create or Join a Game</div>
       </div>
 
-      <!-- Personalization Section -->
       <div style="background: #0f172a; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
         <div style="text-align: center; margin-bottom: 12px;">
           <label style="font-weight: 600; color: #e5e7eb;">Personalize Your Profile</label>
@@ -824,7 +816,6 @@
       <div class="error" id="lobby-error" style="text-align: center;"></div>
     </div>
 
-    <!-- WAITING ROOM -->
     <div class="card" id="waiting-section" style="display:none;">
       <div class="card-header">
         <div class="card-title">Waiting for Player 2</div>
@@ -843,7 +834,6 @@
       </p>
     </div>
 
-    <!-- SETUP CARD -->
     <div class="card" id="setup-section" style="display:none;">
       <div class="card-header">
         <div class="card-title">🔐 Set Your Secret Code</div>
@@ -873,7 +863,6 @@
       </button>
     </div>
 
-    <!-- HANDOFF SCREEN -->
     <div class="card" id="handoff-section" style="display:none;">
       <div style="text-align:center; padding: 40px 20px;">
         <h2 style="font-size: 2rem; margin-bottom: 16px;">Pass Device to <span id="next-player-name">Player 2</span></h2>
@@ -886,7 +875,6 @@
       </div>
     </div>
 
-    <!-- GAME CARD -->
     <div class="card" id="game-section" style="display:none;">
       <div class="card-header">
         <div class="card-title">🎯 Break The Code</div>
@@ -938,7 +926,6 @@
       </div>
     </div>
 
-    <!-- GAME OVER MODAL -->
     <div class="game-over-modal" id="game-over-modal" style="display:none;">
       <div class="game-over-content">
         <div class="game-over-title" id="winner-text">🏆 Victory!</div>
@@ -975,18 +962,10 @@
     </div>
   </div>
 
-  <!-- <footer style="text-align: center; padding: 24px 16px; color: #6b7280; font-size: 0.9rem; margin-top: 40px;">
-    <div style="max-width: 300px; margin: 0 auto;">
-      Made with ❤️ By Jayneel & Smiti
-    </div>
-  </footer> -->
-
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Socket.IO connection
     const socket = io();
 
-    // UI Elements
     const lobbySection = document.getElementById("lobby-section");
     const waitingSection = document.getElementById("waiting-section");
     const setupSection = document.getElementById("setup-section");
@@ -1038,7 +1017,6 @@
     const instructionsPanel = document.getElementById("instructions-panel");
     const rematchStatus = document.getElementById("rematch-status");
 
-    // Game state
     let myPlayerNumber = null;
     let roomCode = null;
     let mySecret = "";
@@ -1050,7 +1028,6 @@
     let secretSet = false;
     let seriesWins = { 1: 0, 2: 0 };
     
-    // Personalization state
     let myPlayerName = "";
     let myAvatar = "🐨";
     let playerInfo = {
@@ -1058,11 +1035,9 @@
       2: { name: "Player 2", avatar: "🐨" }
     };
 
-    // UI Elements for personalization
     const playerNameInput = document.getElementById("player-name-input");
     const avatarOptions = document.querySelectorAll(".avatar-option");
 
-    // Socket.IO event handlers
     socket.on('connect', () => {
       statusDot.classList.remove('disconnected');
       statusDot.classList.add('waiting');
@@ -1076,7 +1051,6 @@
       statusText.textContent = 'Disconnected from server';
     });
 
-    // Toggle instructions
     toggleInstructionsBtn.addEventListener('click', () => {
       if (instructionsPanel.style.display === 'none') {
         instructionsPanel.style.display = 'block';
@@ -1087,7 +1061,6 @@
       }
     });
 
-    // Personalization - Avatar selection
     avatarOptions.forEach(option => {
       option.addEventListener('click', () => {
         avatarOptions.forEach(opt => opt.classList.remove('selected'));
@@ -1096,18 +1069,15 @@
       });
     });
 
-    // Get player name or generate default
     function getPlayerName() {
       const name = playerNameInput.value.trim();
       return name || `Player ${myPlayerNumber}`;
     }
 
-    // Update UI with player info
     function updatePlayerDisplay() {
       const p1Info = playerInfo[1];
       const p2Info = playerInfo[2];
       
-      // Update board labels (only if game section is visible)
       const p1NameDisplay = document.getElementById('p1-name-display');
       const p2NameDisplay = document.getElementById('p2-name-display');
       
@@ -1124,8 +1094,6 @@
             `<span class="avatar-badge" id="p2-avatar-display">${p2Info.avatar}</span> ${p2Info.name}`;
         }
       }
-
-      // Update turn display (only if game section is active)
       if (currentTurnPlayer != null && playerInfo[currentTurnPlayer] && gameStarted) {
         const currentPlayerInfo = playerInfo[currentTurnPlayer];
         const isMyTurn = currentTurnPlayer === myPlayerNumber;
@@ -1142,14 +1110,12 @@
         }
       }
 
-      // Update setup display
       const setupAvatar = document.getElementById('setup-avatar');
       if (setupAvatar && myPlayerNumber) {
         setupAvatar.textContent = playerInfo[myPlayerNumber].avatar;
       }
     }
 
-    // Create room button
     createRoomBtn.addEventListener('click', () => {
       lobbyError.textContent = '';
       myPlayerName = getPlayerName();
@@ -1157,7 +1123,6 @@
       socket.emit('create-room', { name: myPlayerName, avatar: myAvatar });
     });
 
-    // Join room button
     joinRoomBtn.addEventListener('click', () => {
       lobbyError.textContent = '';
       const code = roomCodeInput.value.trim();
@@ -1170,14 +1135,12 @@
       socket.emit('join-room', { code, name: myPlayerName, avatar: myAvatar });
     });
 
-    // Allow Enter key in room code input
     roomCodeInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         joinRoomBtn.click();
       }
     });
 
-    // Copy room code button
     copyCodeBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(roomCode).then(() => {
         copyCodeBtn.textContent = 'Copied!';
@@ -1317,7 +1280,6 @@
       submitGuessBtn.disabled = true;
       currentGuessInput.disabled = true;
 
-      // Update series wins
       if (seriesScore) {
         seriesWins = seriesScore;
       }
@@ -1326,7 +1288,6 @@
       const p1Info = playerInfo[1];
       const p2Info = playerInfo[2];
 
-      // Show game over modal
       if (isTie) {
         winnerText.textContent = '🤝 It\'s a Tie!';
         winnerName.innerHTML = `Both players guessed correctly!`;
@@ -1339,7 +1300,6 @@
       seriesScoreSpan.textContent = `${p1Info.name}: ${seriesWins[1]} | ${p2Info.name}: ${seriesWins[2]}`;
       secretsRevealed.textContent = `${p1Info.name}: ${secrets[1]} | ${p2Info.name}: ${secrets[2]}`;
       
-      // Reset status bar styling
       statusBar.style.backgroundColor = '';
       statusBar.style.color = '';
       statusBar.style.fontWeight = '';
@@ -1356,7 +1316,6 @@
     });
 
     socket.on('waiting-for-rematch', ({ message }) => {
-      // Show waiting feedback
       rematchStatus.style.display = 'block';
       rematchStatus.textContent = '⏳ ' + message;
       playAgainBtn.disabled = true;
@@ -1364,7 +1323,6 @@
     });
 
     socket.on('opponent-wants-rematch', ({ message }) => {
-      // Show notification that opponent wants rematch
       rematchStatus.style.display = 'block';
       rematchStatus.textContent = '🎮 ' + message;
       rematchStatus.style.color = '#22c55e';
@@ -1372,7 +1330,6 @@
     });
 
     socket.on('game-reset', ({ seriesScore }) => {
-      // Reset game state for rematch
       gameOver = false;
       gameStarted = false;
       secretSet = false;
@@ -1389,14 +1346,12 @@
       currentGuessInput.disabled = true;
       submitGuessBtn.disabled = true;
       
-      // Reset rematch UI
       rematchStatus.style.display = 'none';
       rematchStatus.style.color = '#f59e0b';
       playAgainBtn.disabled = false;
       playAgainBtn.textContent = '🔄 Play Again';
       playAgainBtn.style.animation = '';
       
-      // Hide modal and show setup
       gameOverModal.style.display = 'none';
       gameSection.style.display = 'none';
       handoffSection.style.display = 'none';
@@ -1410,15 +1365,12 @@
       statusBar.textContent = 'New round! Set your secrets.';
     });
 
-    // Play again button
     playAgainBtn.addEventListener('click', () => {
       socket.emit('play-again');
     });
 
-    // Exit room button
     exitRoomBtn.addEventListener('click', () => {
       socket.emit('exit-room');
-      // Reset everything
       gameOverModal.style.display = 'none';
       gameSection.style.display = 'none';
       setupSection.style.display = 'none';
@@ -1434,11 +1386,9 @@
       if (!/^[1-9]{5}$/.test(numStr)) {
         return false;
       }
-      // Allow repeating digits
       return true;
     }
 
-    // Set secret button handler
     setSecretBtn.addEventListener("click", () => {
       secretError.textContent = "";
 
@@ -1456,18 +1406,14 @@
       secretInput.value = "";
       secretError.textContent = "";
       
-      // Disable button and show feedback
       setSecretBtn.disabled = true;
       setSecretBtn.textContent = "✓ Secret Set";
     });
 
-    // Ready button handler (handoff screen) - simplified for online play
     readyBtn.addEventListener("click", () => {
       handoffSection.style.display = "none";
-      // The server will handle game state transitions
     });
 
-    // Allow Enter key in secret input
     secretInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
         setSecretBtn.click();
@@ -1502,7 +1448,6 @@
       currentTurnSpan.innerHTML = `<span class="avatar-badge">${currentPlayerInfo.avatar}</span> ${turnPlayerName} Turn`;
       turnIndicator.style.background = isMyTurn ? "#22c55e" : "#f59e0b";
       
-      // Show appropriate board based on player perspective
       if (myPlayerNumber === 1) {
         p1Wrapper.classList.toggle("dimmed", !isMyTurn);
         p2Wrapper.classList.toggle("dimmed", isMyTurn);
@@ -1574,12 +1519,10 @@
         return;
       }
 
-      // Send guess to server
       socket.emit('submit-guess', { guess });
       currentGuessInput.value = "";
     });
 
-    // Allow Enter key to submit
     currentGuessInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
         submitGuessBtn.click();

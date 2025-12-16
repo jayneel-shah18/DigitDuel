@@ -12,18 +12,13 @@ const io = socketIo(server, {
   }
 });
 
-// Serve static files
 app.use(express.static(path.join(__dirname)));
 
-// Redirect root to game
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'game.html'));
 });
 
-// Store active rooms
 const rooms = new Map();
-
-// Generate a random 6-character room code
 function generateRoomCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
@@ -36,10 +31,8 @@ function generateRoomCode() {
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
-  // Create a new room
   socket.on('create-room', ({ name, avatar }) => {
     let roomCode = generateRoomCode();
-    // Ensure unique room code
     while (rooms.has(roomCode)) {
       roomCode = generateRoomCode();
     }
@@ -84,7 +77,6 @@ io.on('connection', (socket) => {
     console.log(`Room ${roomCode} created by ${socket.id} (${name})`);
   });
 
-  // Join an existing room
   socket.on('join-room', ({ code, name, avatar }) => {
     const roomCode = code.toUpperCase().trim();
     const room = rooms.get(roomCode);
@@ -119,7 +111,6 @@ io.on('connection', (socket) => {
       playerInfo: room.playerInfo
     });
 
-    // Notify Player 1 that Player 2 has joined
     io.to(room.playerSockets[1]).emit('player-joined', { 
       playerNumber: 2,
       playerInfo: room.playerInfo
@@ -128,7 +119,6 @@ io.on('connection', (socket) => {
     console.log(`${socket.id} joined room ${roomCode} as ${name}`);
   });
 
-  // Set secret number
   socket.on('set-secret', ({ secret }) => {
     const roomCode = socket.roomCode;
     const room = rooms.get(roomCode);
@@ -143,7 +133,6 @@ io.on('connection', (socket) => {
 
     console.log(`Player ${playerNum} set secret in room ${roomCode}`);
 
-    // Check if both players have set their secrets
     if (room.secrets[1] && room.secrets[2]) {
       room.setupPhase = 3;
       room.currentPlayer = 1;
@@ -156,13 +145,11 @@ io.on('connection', (socket) => {
       
       console.log(`Game started in room ${roomCode}`);
     } else {
-      // Notify the player who just set their secret
       socket.emit('secret-set', { 
         playerNumber: playerNum,
         waitingForOther: !(room.secrets[1] && room.secrets[2])
       });
       
-      // Notify other player to set their secret
       const otherPlayerNum = playerNum === 1 ? 2 : 1;
       const otherSocketId = room.playerSockets[otherPlayerNum];
       if (otherSocketId) {
@@ -173,7 +160,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Submit a guess
   socket.on('submit-guess', ({ guess }) => {
     const roomCode = socket.roomCode;
     const room = rooms.get(roomCode);
@@ -195,11 +181,9 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Determine which secret to evaluate against
     const targetPlayerNum = playerNum === 1 ? 2 : 1;
     const targetSecret = room.secrets[targetPlayerNum];
 
-    // Evaluate the guess
     const result = evaluateGuess(targetSecret, guess);
     
     room.attempts[playerNum]++;
@@ -207,7 +191,6 @@ io.on('connection', (socket) => {
 
     const isCorrect = result.correctPlace === 5;
     
-    // Broadcast the guess to both players
     io.to(roomCode).emit('guess-submitted', {
       playerNumber: playerNum,
       guess,
@@ -218,14 +201,10 @@ io.on('connection', (socket) => {
 
     console.log(`Player ${playerNum} guessed ${guess} in room ${roomCode}`);
 
-    // Check win condition
     if (isCorrect) {
-      // CASE 1: Player 1 wins on their turn then allow Player 2 final chance
       if (playerNum === 1 && !room.fairPlay.pendingFinalTurn) {
         room.fairPlay.pendingFinalTurn = true;
         room.fairPlay.provisionalWinner = 1;
-
-        // Switch to Player 2 for final attempt
         room.currentPlayer = 2;
 
         io.to(roomCode).emit('player1-won-final-chance', {
@@ -236,15 +215,13 @@ io.on('connection', (socket) => {
         });
 
         console.log(`Player 1 won in room ${roomCode}, giving Player 2 final chance`);
-        return; //Do NOT end game yet
+        return;
       }
 
-      // CASE 2: Player 2 wins OR Player 2 ties on final chance
       room.gameOver = true;
 
-      // If Player 2 also guessed correctly during final chance → tie
       if (room.fairPlay.pendingFinalTurn && playerNum === 2) {
-        room.winner = 0; // 0 = tie
+        room.winner = 0;
         console.log(`Game tied in room ${roomCode}`);
       } else {
         room.winner = playerNum;
@@ -262,7 +239,6 @@ io.on('connection', (socket) => {
 
       return;
     } else {
-      // If Player 2 failed their final fair-play attempt
       if (room.fairPlay.pendingFinalTurn && playerNum === 2) {
         room.gameOver = true;
         room.winner = room.fairPlay.provisionalWinner;
@@ -302,17 +278,13 @@ io.on('connection', (socket) => {
       provisionalWinner: null
     };
     
-    // Initialize playAgainVotes if it doesn't exist
     if (!room.playAgainVotes) {
       room.playAgainVotes = new Set();
     }
 
-    // Add player's vote
     room.playAgainVotes.add(socket.playerNumber);
 
-    // Check if both players have voted
     if (room.playAgainVotes.size === 2) {
-      // Reset game state but keep series score
       room.secrets = {};
       room.setupPhase = 1;
       room.currentPlayer = 1;
@@ -320,21 +292,18 @@ io.on('connection', (socket) => {
       room.attempts = { 1: 0, 2: 0 };
       room.gameOver = false;
       room.winner = null;
-      room.playAgainVotes = new Set(); // Clear votes for next rematch
+      room.playAgainVotes = new Set();
 
-      // Notify both players to reset
       io.to(roomCode).emit('game-reset', {
         seriesScore: room.seriesWins
       });
 
       console.log(`Game reset in room ${roomCode}, series score: P1=${room.seriesWins[1]}, P2=${room.seriesWins[2]}`);
     } else {
-      // Notify player that their vote has been registered
       socket.emit('waiting-for-rematch', {
         message: 'Waiting for opponent to accept rematch...'
       });
       
-      // Notify other player that opponent wants to play again
       const otherPlayerNum = socket.playerNumber === 1 ? 2 : 1;
       const otherSocketId = room.playerSockets[otherPlayerNum];
       if (otherSocketId) {
@@ -345,24 +314,20 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Exit room
   socket.on('exit-room', () => {
     const roomCode = socket.roomCode;
     if (roomCode) {
       const room = rooms.get(roomCode);
       if (room) {
-        // Notify other player
         socket.to(roomCode).emit('player-disconnected', {
           playerNumber: socket.playerNumber
         });
         
-        // Remove player from room
         const index = room.players.indexOf(socket.id);
         if (index > -1) {
           room.players.splice(index, 1);
         }
 
-        // Delete room if empty
         if (room.players.length === 0) {
           rooms.delete(roomCode);
           console.log(`Room ${roomCode} deleted (all players left)`);
@@ -375,7 +340,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle disconnect
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     
@@ -383,12 +347,10 @@ io.on('connection', (socket) => {
     if (roomCode) {
       const room = rooms.get(roomCode);
       if (room) {
-        // Notify other player
         io.to(roomCode).emit('player-disconnected', {
           playerNumber: socket.playerNumber
         });
 
-        // Clean up room after 5 minutes of inactivity
         setTimeout(() => {
           const currentRoom = rooms.get(roomCode);
           if (currentRoom && currentRoom.players.includes(socket.id)) {
@@ -401,7 +363,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Evaluate guess vs secret (Wordle-like)
 function evaluateGuess(secret, guess) {
   const length = secret.length;
   const statuses = Array(length).fill("absent");
@@ -412,7 +373,6 @@ function evaluateGuess(secret, guess) {
   const guessArr = guess.split("");
   const usedSecret = Array(length).fill(false);
 
-  // First pass: correct place
   for (let i = 0; i < length; i++) {
     if (guessArr[i] === secretArr[i]) {
       statuses[i] = "correct";
@@ -422,7 +382,6 @@ function evaluateGuess(secret, guess) {
     }
   }
 
-  // Second pass: present (correct digit wrong position)
   for (let i = 0; i < length; i++) {
     if (statuses[i] === "correct") continue;
     const digit = guessArr[i];
